@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="ru" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="description" content="Premium digital gift — 25th birthday for Shemshat Babayeva" />
+  <title>Шемшат Бабаева — 25 лет ✨</title>
+
+  <!-- Google Fonts: Playfair Display + Montserrat -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            playfair: ['"Playfair Display"', 'Georgia', 'serif'],
+            montserrat: ['Montserrat', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            cream: '#fff6f6',
+            rosegold: '#c9a087',
+            rosegoldDark: '#a67c5b',
+            blush: '#f6e6dd',
+          },
+          boxShadow: {
+            'rose-glow': '0 0 40px rgba(201, 160, 135, 0.35), 0 0 80px rgba(201, 160, 135, 0.15)',
+            'rose-glow-sm': '0 4px 24px rgba(201, 160, 135, 0.25)',
+            glass: '0 8px 32px rgba(255, 255, 255, 0.4), inset 0 1px 0 rgba(255,255,255,0.8)',
+          },
+          animation: {
+            'pulse-soft': 'pulseSoft 2.5s ease-in-out infinite',
+            'fade-up': 'fadeUp 0.6s ease-out forwards',
+            'number-flip': 'numberFlip 0.35s ease-out',
+          },
+          keyframes: {
+            pulseSoft: {
+              '0%, 100%': { boxShadow: '0 0 0 0 rgba(201, 160, 135, 0.4)' },
+              '50%': { boxShadow: '0 0 0 12px rgba(201, 160, 135, 0)' },
+            },
+            fadeUp: {
+              '0%': { opacity: '0', transform: 'translateY(16px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+            numberFlip: {
+              '0%': { opacity: '0', transform: 'translateY(8px) scale(0.95)' },
+              '100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
+            },
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    :root {
+      --gradient-mesh: linear-gradient(135deg, #fff6f6 0%, #fdf3ee 50%, #f6e6dd 100%);
+      --rose-gold: #c9a087;
+      --rose-gold-light: #e8d4c8;
+    }
+
+    * { -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: 'Montserrat', system-ui, sans-serif;
+      background: var(--gradient-mesh);
+      background-attachment: fixed;
+      min-height: 100dvh;
+      overflow-x: hidden;
+    }
+
+    /* Particle canvas — fixed, no scroll jank */
+    #particle-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .content-layer { position: relative; z-index: 1; }
+
+    .glass {
+      background: rgba(255, 255, 255, 0.4);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+    }
+
+    .glass-strong {
+      background: rgba(255, 255, 255, 0.55);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+    }
+
+    /* Timer digit transition */
+    .timer-value {
+      display: inline-block;
+      min-width: 2ch;
+      transition: transform 0.35s ease, opacity 0.35s ease;
+    }
+    .timer-value.tick {
+      animation: numberFlip 0.35s ease-out;
+    }
+
+    /* Timeline glowing line */
+    .timeline-line {
+      background: linear-gradient(
+        180deg,
+        transparent 0%,
+        #e8c4b0 8%,
+        #c9a087 25%,
+        #d4a574 50%,
+        #c9a087 75%,
+        #e8c4b0 92%,
+        transparent 100%
+      );
+      box-shadow: 0 0 20px rgba(201, 160, 135, 0.5), 0 0 40px rgba(201, 160, 135, 0.2);
+    }
+
+    .timeline-node-dot {
+      box-shadow: 0 0 0 4px rgba(255,255,255,0.8), 0 0 20px rgba(201, 160, 135, 0.6);
+    }
+
+    /* Timeline image reveal — hidden until active */
+    .timeline-photo-wrap {
+      opacity: 0;
+      transform: scale(0.88) rotate(-2deg);
+      filter: blur(8px);
+      transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+                  transform 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+                  filter 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+      pointer-events: none;
+    }
+    .timeline-card.is-revealed .timeline-photo-wrap,
+    .timeline-card:hover .timeline-photo-wrap,
+    .timeline-card:focus-within .timeline-photo-wrap {
+      opacity: 1;
+      transform: scale(1) rotate(0deg);
+      filter: blur(0);
+      pointer-events: auto;
+    }
+
+    /* Soundwave bars */
+    .soundwave-bar {
+      width: 3px;
+      border-radius: 2px;
+      background: linear-gradient(180deg, #c9a087, #a67c5b);
+      animation: soundwave 0.8s ease-in-out infinite;
+    }
+    .soundwave-bar:nth-child(1) { animation-delay: 0s; height: 8px; }
+    .soundwave-bar:nth-child(2) { animation-delay: 0.15s; height: 14px; }
+    .soundwave-bar:nth-child(3) { animation-delay: 0.3s; height: 10px; }
+    .soundwave-bar:nth-child(4) { animation-delay: 0.1s; height: 16px; }
+    .soundwave-bar:nth-child(5) { animation-delay: 0.25s; height: 8px; }
+
+    @keyframes soundwave {
+      0%, 100% { transform: scaleY(0.4); opacity: 0.6; }
+      50% { transform: scaleY(1); opacity: 1; }
+    }
+    #audio-btn:not(.is-playing) .soundwave-bar {
+      animation: none;
+      transform: scaleY(0.35);
+      opacity: 0.4;
+    }
+
+    /* Petal shower */
+    .petal {
+      position: fixed;
+      top: -40px;
+      z-index: 9999;
+      pointer-events: none;
+      font-size: clamp(14px, 3vw, 22px);
+      animation: petalFall linear forwards;
+      filter: drop-shadow(0 2px 4px rgba(201, 160, 135, 0.3));
+    }
+    @keyframes petalFall {
+      0% {
+        transform: translateY(0) translateX(0) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(110vh) translateX(var(--drift)) rotate(var(--spin));
+        opacity: 0.3;
+      }
+    }
+
+    /* Constellation decorative stars */
+    .star-dot {
+      animation: twinkle 3s ease-in-out infinite;
+    }
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.3; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.2); }
+    }
+
+    /* Compliment reveal */
+    #compliment-box {
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transition: max-height 0.6s ease, opacity 0.5s ease, margin 0.5s ease;
+    }
+    #compliment-box.is-visible {
+      max-height: 200px;
+      opacity: 1;
+      margin-top: 1.25rem;
+    }
+
+    /* ========== ANIMATED OPENING CARD (ОТКРЫТКА) ========== */
+    body.is-locked { overflow: hidden; }
+
+    #opening-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: var(--gradient-mesh);
+      transition: opacity 0.9s ease, visibility 0.9s ease;
+    }
+    #opening-overlay.is-opened {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .envelope-scene {
+      perspective: 1200px;
+      width: min(92vw, 340px);
+      height: min(58vh, 280px);
+      position: relative;
+    }
+
+    .envelope {
+      position: relative;
+      width: 100%;
+      height: 220px;
+      margin: 0 auto;
+      transform-style: preserve-3d;
+    }
+
+    .envelope-body {
+      position: absolute;
+      inset: 0;
+      border-radius: 4px 4px 12px 12px;
+      background: linear-gradient(160deg, #f8ebe3 0%, #e8d4c8 45%, #d4b8a8 100%);
+      border: 1px solid rgba(255,255,255,0.7);
+      box-shadow: 0 20px 50px rgba(166, 124, 91, 0.25), inset 0 1px 0 rgba(255,255,255,0.9);
+    }
+
+    .envelope-body::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 55%;
+      background: linear-gradient(180deg, rgba(201,160,135,0.15), transparent);
+      clip-path: polygon(0 0, 50% 100%, 100% 0);
+    }
+
+    .envelope-flap {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 52%;
+      transform-origin: top center;
+      background: linear-gradient(180deg, #f0ddd2, #e0c4b4);
+      clip-path: polygon(0 0, 50% 100%, 100% 0);
+      border: 1px solid rgba(255,255,255,0.5);
+      z-index: 4;
+      transition: transform 1.1s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 20px rgba(166, 124, 91, 0.2);
+    }
+
+    #opening-overlay.is-opening .envelope-flap {
+      transform: rotateX(-175deg);
+    }
+
+    .envelope-card {
+      position: absolute;
+      left: 8%;
+      right: 8%;
+      top: 18%;
+      bottom: 12%;
+      z-index: 2;
+      border-radius: 8px;
+      background: linear-gradient(145deg, #fffefb, #fff6f6);
+      border: 1px solid rgba(201, 160, 135, 0.35);
+      box-shadow: 0 8px 24px rgba(201, 160, 135, 0.2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.25rem;
+      text-align: center;
+      transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.35s,
+                  opacity 0.6s ease 0.2s;
+    }
+
+    #opening-overlay.is-opening .envelope-card {
+      transform: translateY(-115%) scale(1.02);
+      z-index: 6;
+    }
+
+    .envelope-seal {
+      position: absolute;
+      left: 50%;
+      top: 38%;
+      transform: translate(-50%, -50%);
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #e8c4b0, #c9a087);
+      border: 2px solid rgba(255,255,255,0.8);
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      box-shadow: 0 0 24px rgba(201, 160, 135, 0.5);
+      transition: transform 0.5s ease, opacity 0.5s ease;
+    }
+
+    #opening-overlay.is-opening .envelope-seal {
+      transform: translate(-50%, -50%) scale(0);
+      opacity: 0;
+    }
+
+    .open-hint {
+      animation: hintPulse 2s ease-in-out infinite;
+    }
+    @keyframes hintPulse {
+      0%, 100% { opacity: 0.7; transform: translateY(0); }
+      50% { opacity: 1; transform: translateY(-4px); }
+    }
+
+    .sparkle-burst {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0;
+    }
+    #opening-overlay.is-opening .sparkle-burst {
+      animation: burstFade 1.2s ease forwards 0.5s;
+    }
+    @keyframes burstFade {
+      0% { opacity: 0; }
+      30% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    .timeline-photo-wrap img.photo-loading {
+      background: linear-gradient(110deg, #f6e6dd 25%, #fff6f6 50%, #f6e6dd 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.2s ease-in-out infinite;
+    }
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    .timeline-photo-error {
+      display: none;
+      padding: 1rem;
+      text-align: center;
+      font-size: 0.75rem;
+      color: #a67c5b;
+    }
+    .timeline-photo-wrap.has-error img { display: none; }
+    .timeline-photo-wrap.has-error .timeline-photo-error { display: block; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .timeline-photo-wrap,
+      .petal,
+      .timer-value,
+      .star-dot,
+      .envelope-flap,
+      .envelope-card,
+      .open-hint { transition: none; animation: none !important; }
+      #particle-canvas { display: none; }
+      #opening-overlay.is-opening .envelope-flap { transform: rotateX(-180deg); }
+      #opening-overlay.is-opening .envelope-card { transform: translateY(-80%); }
+    }
+  </style>
+</head>
+<body class="text-stone-700 antialiased is-locked">
+
+  <!-- ========== ANIMATED OPENING CARD — tap to open ========== -->
+  <div id="opening-overlay" role="dialog" aria-labelledby="opening-title" aria-modal="true">
+    <div class="sparkle-burst flex items-center justify-center text-4xl" aria-hidden="true">✨ 🌹 ✨</div>
+    <div class="envelope-scene">
+      <div class="envelope" id="envelope">
+        <div class="envelope-body" aria-hidden="true"></div>
+        <div class="envelope-card">
+          <p class="text-[10px] uppercase tracking-[0.3em] text-rosegold mb-2">Premium Gift</p>
+          <h1 id="opening-title" class="font-playfair text-xl sm:text-2xl text-stone-800 font-semibold leading-snug">
+            Для Шемшат 
+          </h1>
+          <p class="font-montserrat text-xs text-stone-500 mt-2">25 лет • 21 мая ♊</p>
+          <p class="font-playfair italic text-sm text-rosegoldDark mt-4">С юбилеем, королева!</p>
+        </div>
+        <div class="envelope-flap" aria-hidden="true"></div>
+        <div class="envelope-seal" aria-hidden="true">💖</div>
+      </div>
+    </div>
+    <button
+      id="open-card-btn"
+      type="button"
+      class="open-hint mt-10 glass-strong rounded-full px-8 py-4 font-montserrat text-sm font-medium text-stone-700 shadow-rose-glow hover:scale-[1.02] active:scale-[0.98] transition-transform"
+    >
+      Открыть открытку ✨
+    </button>
+    <p class="mt-4 text-[10px] text-stone-400 tracking-wide">Нажми, чтобы начать · 🎵 с музыкой</p>
+  </div>
+
+  <!-- ========== BACKGROUND PARTICLES CANVAS ========== -->
+  <canvas id="particle-canvas" aria-hidden="true"></canvas>
+
+  <!-- ========== BACKGROUND AUDIO — положите music.mp3 в эту папку или укажите URL в MUSIC_SOURCES -->
+  <audio id="bg-audio" loop preload="auto" playsinline></audio>
+
+  <div class="content-layer opacity-0 transition-opacity duration-1000" id="main-content">
+
+    <!-- ========== AUDIO TOGGLE (top-right) ========== -->
+    <button
+      id="audio-btn"
+      type="button"
+      class="fixed top-4 right-4 z-50 flex items-center gap-2 rounded-full glass px-4 py-3 shadow-rose-glow-sm animate-pulse-soft transition-all hover:scale-105 active:scale-95 safe-top ui-hidden-until-open"
+      aria-label="Включить или выключить музыку"
+      title="Музыка"
+    >
+      <span id="audio-icon" class="text-lg" aria-hidden="true">🔇</span>
+      <span class="flex items-end gap-0.5 h-4" aria-hidden="true">
+        <span class="soundwave-bar"></span>
+        <span class="soundwave-bar"></span>
+        <span class="soundwave-bar"></span>
+        <span class="soundwave-bar"></span>
+        <span class="soundwave-bar"></span>
+      </span>
+    </button>
+
+    <!-- ========== HERO SECTION ========== -->
+    <header class="relative px-4 pt-16 pb-12 sm:px-6 sm:pt-20 sm:pb-16 max-w-4xl mx-auto text-center">
+      <div class="inline-block glass rounded-full px-5 py-2 mb-8 shadow-glass">
+        <p class="font-montserrat text-[10px] sm:text-xs tracking-[0.25em] uppercase text-rosegoldDark font-medium">
+          PREMIUM DIGITAL GIFT • TWENTY-FIVE
+        </p>
+      </div>
+
+      <h1 class="font-playfair text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold text-stone-800 leading-tight mb-4 shadow-rose-glow">
+        Шемшат Бабаева, с юбилеем! ✨
+      </h1>
+
+      <p class="font-montserrat text-sm sm:text-base text-stone-600 font-light max-w-xl mx-auto mb-10">
+        Ты делаешь этот мир лучше и прекраснее уже:
+      </p>
+
+      <!-- Live Premium Timer — SETUP BIRTHDATE in JS -->
+      <div
+        id="timer-grid"
+        class="grid grid-cols-3 sm:grid-cols-6 gap-3 sm:gap-4 max-w-3xl mx-auto"
+        role="timer"
+        aria-live="polite"
+      >
+        <div class="glass rounded-2xl p-3 sm:p-4 shadow-rose-glow-sm">
+          <span id="t-years" class="timer-value font-playfair text-2xl sm:text-3xl font-semibold text-rosegoldDark block">—</span>
+          <span class="text-[10px] sm:text-xs uppercase tracking-widest text-stone-500 mt-1 block">Лет</span>
+        </div>
+        <div class="glass rounded-2xl p-3 sm:p-4 shadow-rose-glow-sm">
+          <span id="t-months" class="timer-value font-playfair text-2xl sm:text-3xl font-semibold text-rosegoldDark block">—</span>
+          <span class="text-[10px] sm:text-xs uppercase tracking-widest text-stone-500 mt-1 block">Мес</span>
+        </div>
+        <div class="glass rounded-2xl p-3 sm:p-4 shadow-rose-glow-sm">
+          <span id="t-days" class="timer-value font-playfair text-2xl sm:text-3xl font-semibold text-rosegoldDark block">—</span>
+          <span class="text-[10px] sm:text-xs uppercase tracking-widest text-stone-500 mt-1 block">Дней</span>
+        </div>
+        <div class="glass rounded-2xl p-3 sm:p-4 shadow-rose-glow-sm col-span-1">
+          <span id="t-hours" class="timer-value font-playfair text-2xl sm:text-3xl font-semibold text-rosegoldDark block">—</span>
+          <span class="text-[10px] sm:text-xs uppercase tracking-widest text-stone-500 mt-1 block">Час</span>
+        </div>
+        <div class="glass rounded-2xl p-3 sm:p-4 shadow-rose-glow-sm">
+          <span id="t-minutes" class="timer-value font-playfair text-2xl sm:text-3xl font-semibold text-rosegoldDark block">—</span>
+          <span class="text-[10px] sm:text-xs uppercase tracking-widest text-stone-500 mt-1 block">Мин</span>
+        </div>
+        <div class="glass rounded-2xl p-3 sm:p-4 shadow-rose-glow-sm ring-1 ring-rosegold/30">
+          <span id="t-seconds" class="timer-value font-playfair text-2xl sm:text-3xl font-semibold text-rosegoldDark block">—</span>
+          <span class="text-[10px] sm:text-xs uppercase tracking-widest text-stone-500 mt-1 block">Сек</span>
+        </div>
+      </div>
+
+      <p class="mt-8 text-xs text-stone-500 font-light">
+        <span class="text-rosegold">♊</span> 21 мая 2001 · Gemini
+      </p>
+    </header>
+
+    <!-- ========== TIMELINE SECTION ========== -->
+    <section class="relative px-4 py-16 sm:px-6 sm:py-24 max-w-3xl mx-auto" aria-labelledby="timeline-heading">
+      <h2 id="timeline-heading" class="font-playfair text-2xl sm:text-3xl text-center text-stone-800 mb-16 font-semibold">
+        История наших моментов
+      </h2>
+
+      <!-- Glowing vertical line -->
+      <div class="absolute left-1/2 top-32 bottom-24 w-0.5 -translate-x-1/2 timeline-line hidden sm:block" aria-hidden="true"></div>
+
+      <div id="timeline" class="relative space-y-12 sm:space-y-16">
+        <!-- Timeline cards injected by JS from TIMELINE_DATA -->
+      </div>
+    </section>
+
+    <!-- ========== GEMINI / COSMIC SECTION ========== -->
+    <section class="px-4 py-12 sm:px-6 sm:py-16 max-w-2xl mx-auto" aria-labelledby="gemini-heading">
+      <div class="glass-strong rounded-3xl p-6 sm:p-10 shadow-rose-glow relative overflow-hidden">
+        <!-- Constellation map decoration -->
+        <div class="absolute inset-0 pointer-events-none opacity-40" aria-hidden="true">
+          <span class="star-dot absolute top-8 left-12 w-1.5 h-1.5 rounded-full bg-rosegold"></span>
+          <span class="star-dot absolute top-16 right-20 w-1 h-1 rounded-full bg-rosegold" style="animation-delay: 0.5s"></span>
+          <span class="star-dot absolute bottom-20 left-1/4 w-1 h-1 rounded-full bg-rosegoldDark" style="animation-delay: 1s"></span>
+          <span class="star-dot absolute top-1/3 right-8 w-2 h-2 rounded-full bg-rosegold/60" style="animation-delay: 1.5s"></span>
+          <span class="star-dot absolute bottom-12 right-1/3 w-1.5 h-1.5 rounded-full bg-rosegold" style="animation-delay: 0.8s"></span>
+          <svg class="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
+            <line x1="15%" y1="12%" x2="28%" y2="22%" stroke="rgba(201,160,135,0.25)" stroke-width="0.5"/>
+            <line x1="28%" y1="22%" x2="75%" y2="18%" stroke="rgba(201,160,135,0.25)" stroke-width="0.5"/>
+            <line x1="28%" y1="22%" x2="22%" y2="65%" stroke="rgba(201,160,135,0.2)" stroke-width="0.5"/>
+            <line x1="75%" y1="18%" x2="82%" y2="35%" stroke="rgba(201,160,135,0.2)" stroke-width="0.5"/>
+          </svg>
+        </div>
+
+        <div class="relative z-10 text-center">
+          <p class="text-xs uppercase tracking-[0.2em] text-rosegold mb-2">Constellation</p>
+          <h2 id="gemini-heading" class="font-playfair text-xl sm:text-2xl text-stone-800 mb-6">
+            Магия твоего знака: Близнецы ♊
+          </h2>
+          <p class="font-montserrat text-sm sm:text-base leading-relaxed text-stone-600 font-light text-left sm:text-center">
+            Родиться на стыке сезонов — это дар. Шемшат, как истинные Близнецы, обладает невероятным внутренним магнетизмом, гибким, проницательным интеллектом и лёгкостью, которая притягивает людей. Ты способна очаровать с первого слова, поддержать любую глубокую тему и превратить обычный день в праздник. В тебе уживаются элегантная леди и искренний, вечно молодой первооткрыватель!
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== COMPLIMENT GENERATOR ========== -->
+    <section class="px-4 py-12 sm:px-6 pb-20 max-w-xl mx-auto text-center">
+      <button
+        id="compliment-btn"
+        type="button"
+        class="glass-strong rounded-full px-8 py-4 font-montserrat text-sm sm:text-base font-medium text-stone-700 shadow-rose-glow hover:shadow-rose-glow transition-all hover:scale-[1.02] active:scale-[0.98] tracking-wide"
+      >
+        Узнать суперсилу Шемшат 💖
+      </button>
+
+      <div id="compliment-box" class="glass rounded-2xl px-6 py-5 mx-auto max-w-lg">
+        <p id="compliment-text" class="font-playfair text-lg sm:text-xl text-stone-800 italic leading-relaxed"></p>
+      </div>
+    </section>
+
+    <!-- ========== FOOTER ========== -->
+    <footer class="px-4 pb-16 pt-4 text-center max-w-2xl mx-auto">
+      <p class="font-montserrat text-sm sm:text-base text-stone-600 font-light leading-relaxed">
+        С любовью в твои прекрасные 25 лет! Пусть этот юбилей станет отправной точкой к самым грандиозным вершинам... 🚀
+      </p>
+      <p class="mt-6 text-[10px] tracking-widest uppercase text-rosegold/80">Shemshat · Babayeva · 2026</p>
+    </footer>
+  </div>
+
+  <script>
+    /* ============================================================
+       SETUP BIRTHDATE — change here if needed
+       May 21, 2001 at 00:00 local time
+    ============================================================ */
+    const BIRTH_DATE = new Date(2001, 4, 21, 0, 0, 0, 0); // month is 0-indexed
+
+    /* ============================================================
+       IMAGE URL HELPER — ImgBB: use DIRECT link (i.ibb.co/.../file.jpg)
+       Page links ibb.co/xxx are auto-converted via proxy below.
+       In ImgBB: Embed codes → "Image link" (starts with https://i.ibb.co/)
+    ============================================================ */
+    function isDirectImageUrl(url) {
+      return /^https?:\/\/i\.ibb\.co\//i.test(url) || /\.(jpe?g|png|gif|webp|avif|bmp)(\?|#|$)/i.test(url);
+    }
+
+    /** Sync guess; page links need fetchDirectFromImgBB */
+    function resolveImageUrl(url) {
+      if (!url || typeof url !== 'string') return '';
+      const u = url.trim();
+      if (isDirectImageUrl(u)) return u;
+      return u;
+    }
+
+    async function fetchDirectFromImgBB(pageUrl) {
+      const proxy = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(pageUrl);
+      const res = await fetch(proxy);
+      const html = await res.text();
+      const og = html.match(/og:image" content="(https:\/\/i\.ibb\.co\/[^"]+)"/i);
+      if (og) return og[1];
+      const json = html.match(/image_viewer\.image=\{[^}]*"url":"(https:\\\/\\\/i\.ibb\.co\\\/[^"]+)"/);
+      if (json) return json[1].replace(/\\\//g, '/');
+      return null;
+    }
+
+    async function setupTimelineImage(wrap, rawUrl) {
+      const img = document.createElement('img');
+      img.alt = '';
+      img.className = 'w-full h-full object-cover photo-loading';
+      img.loading = 'lazy';
+      img.decoding = 'async';
+      img.referrerPolicy = 'no-referrer';
+
+      const err = document.createElement('p');
+      err.className = 'timeline-photo-error';
+      err.innerHTML =
+        'Фото не загрузилось.<br>В ImgBB скопируйте <strong>Image link</strong> (https://i.ibb.co/...)<br>' +
+        '<a class="underline text-rosegold" href="' + rawUrl.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener">Открыть альбом</a>';
+
+      const tryLoad = (src) => {
+        img.classList.add('photo-loading');
+        wrap.classList.remove('has-error');
+        img.src = src;
+      };
+
+      img.addEventListener('load', () => img.classList.remove('photo-loading'));
+      img.addEventListener('error', async () => {
+        if (/ibb\.co\//i.test(rawUrl) && !img.dataset.retried) {
+          img.dataset.retried = '1';
+          const direct = await fetchDirectFromImgBB(rawUrl);
+          if (direct) {
+            tryLoad(direct);
+            return;
+          }
+        }
+        img.classList.remove('photo-loading');
+        wrap.classList.add('has-error');
+      });
+
+      wrap.appendChild(img);
+      wrap.appendChild(err);
+
+      let src = resolveImageUrl(rawUrl);
+      if (/ibb\.co\//i.test(rawUrl) && !isDirectImageUrl(rawUrl)) {
+        fetchDirectFromImgBB(rawUrl).then((direct) => {
+          if (direct) tryLoad(direct);
+          else tryLoad(src);
+        });
+      } else {
+        tryLoad(src);
+      }
+    }
+
+    /* ============================================================
+       OPENING CARD — открытка
+    ============================================================ */
+    const openingOverlay = document.getElementById('opening-overlay');
+    const openCardBtn = document.getElementById('open-card-btn');
+    const mainContent = document.getElementById('main-content');
+
+    function openGiftCard() {
+      if (openingOverlay.classList.contains('is-opening')) return;
+      openingOverlay.classList.add('is-opening');
+      openCardBtn.disabled = true;
+
+      setTimeout(() => {
+        openingOverlay.classList.add('is-opened');
+        document.body.classList.remove('is-locked');
+        mainContent.classList.remove('opacity-0');
+        mainContent.classList.add('opacity-100');
+        document.querySelectorAll('.ui-hidden-until-open').forEach((el) => {
+          el.classList.remove('opacity-0', 'pointer-events-none', 'ui-hidden-until-open');
+        });
+        openingOverlay.setAttribute('aria-hidden', 'true');
+        startBackgroundMusic();
+      }, 1600);
+    }
+
+    openCardBtn.addEventListener('click', openGiftCard);
+    openingOverlay.addEventListener('click', (e) => {
+      if (e.target === openingOverlay || e.target.closest('#envelope')) openGiftCard();
+    });
+
+    /* ============================================================
+       TIMELINE DATA — EDIT PHOTO LINK HERE (page or direct URL)
+    ============================================================ */
+    const TIMELINE_DATA = [
+      {
+        date: '24.09.2019',
+        title: 'День первой встречи 🌳',
+        text: 'Наш незабываемый день в парке. Мы сидели по обе стороны скамейки — ты с одной стороны, я с другой — словно между нами протекала бурная река Амударья. Кто бы мог подумать, во что это перерастет...',
+        img: 'https://i.ibb.co/M0B3YBb/24092019.jpg', // прямая ссылка (или https://ibb.co/страница)
+      },
+      {
+        date: '15.12.2019',
+        title: 'Ледовая сказка ⛸️',
+        text: 'День, когда ты открыла для меня совершенно новый мир — отвела в ледовый дворец и терпеливо научила кататься на коньках. Момент абсолютного счастья.',
+        img: 'https://i.ibb.co/hzH0FN0/15122019.jpg', // EDIT PHOTO LINK HERE
+      },
+      {
+        date: '22.04.2020',
+        title: 'Студенческий пикник ☀️',
+        text: 'Замечательный пикник с однокурсниками. Помнишь, как мы даже не заметили, как пролетело время? Ах, эти беззаботные, золотые студенческие годы!)))',
+        img: 'https://i.ibb.co/84TypYfR/22042020.jpg', // EDIT PHOTO LINK HERE
+      },
+      {
+        date: '04.06.2020',
+        title: 'Вспышка красоты ✨',
+        text: 'Тот самый особенный момент, когда ты впервые прислала мне свою фотографию с полным, безупречным макияжем. Сердце тогда замерло от восхищения.',
+        img: 'https://i.ibb.co/XfBwXbRf/04062020.jpg', // EDIT PHOTO LINK HERE
+      },
+      {
+        date: '28.05.2021',
+        title: 'Абсолютный фотошедевр 📸',
+        text: 'Один из самых лучших, живых и эстетичных кадров в твоей личной истории. Обожаю эту фотографию.',
+        img: 'https://i.ibb.co/hJVSqFCY/2020202.webp', // EDIT: вставьте прямую ссылку i.ibb.co для этого фото
+      },
+      {
+        date: '26.09.2021',
+        title: 'Переулок Байрамхан 🌙',
+        text: 'Потрясающий тёплый вечер, когда мы так долго и искренне разговаривали с твоей матерью, сидя вместе в переулке Байрамхан. Мы провели там целых 4 часа, и это было наполнено огромной гордостью.',
+        img: 'https://i.ibb.co/Z6MTPCVg/26092021.jpg', // EDIT PHOTO LINK HERE
+      },
+      {
+        date: '04.05.2026',
+        title: 'Мой любимый кадр 💖',
+        text: 'Одна из самых лучших, глубоких и прекрасных фотографий для меня. В этом взгляде — вся твоя неповторимая вселенная.',
+        img: 'https://i.ibb.co/Rpr7Q7HD/2.jpg', // EDIT PHOTO LINK HERE
+      },
+      {
+        date: '2026',
+        title: 'Отражение души • 🕊️',
+        text: '«Есть люди, которые приносят в жизнь особый свет. Они меняют атмосферу вокруг просто своим присутствием». Это полностью про тебя, Шемшат.',
+        img: 'https://i.ibb.co/HDjZpHYk/1.jpg', // EDIT PHOTO LINK HERE
+      },
+      {
+        date: '2026',
+        title: 'Твой расцвет •  👑',
+        text: '«В 25 лет женщина становится по-настоящему опасной: она сочетает в себе ум взрослого человека, грацию королевы и сердце юной мечтательницы». С твоим сияющим юбилеем!',
+        img: 'https://i.ibb.co/Hpt7wSM6/3.jpg', // EDIT PHOTO LINK HERE
+      },
+    ];
+
+    /* ============================================================
+       COMPLIMENTS — add or edit messages in Russian
+    ============================================================ */
+    const COMPLIMENTS = [
+      'Твоя улыбка — редкий дар, который делает любой день светлее, даже когда за окном серое небо.',
+      'В тебе удивительно сочетаются мягкость и внутренняя сила — это редкое и бесценное качество.',
+      'Ты обладаешь тонким умом и добротой, которые вдохновляют окружающих становиться лучше.',
+      'Твоя красота — не только внешняя: в каждом жесте, слове и взгляде чувствуется настоящая глубина души.',
+      'Шемшат, ты умеешь слушать так, что человеку рядом хочется открыться — это настоящая суперсила.',
+      'Твоя искренность и лёгкость превращают обычные встречи в воспоминания, которые хочется хранить вечно.',
+      'В 25 лет ты сияешь с той грацией, которой многие учатся всю жизнь — будь собой, это твой лучший стиль.',
+      'Ты приносишь в жизнь тепло, юмор и свет — рядом с тобой мир становится добрее и интереснее.',
+      'Твоя интуиция и проницательность помогают видеть суть вещей — это дар, которым стоит гордиться.',
+      'Шемшат, ты — человек, ради которого хочется стремиться к лучшему. С юбилеем, королева! 👑',
+    ];
+
+    /* ===================== LIVE TIMER ===================== */
+    function getElapsedParts(from, to) {
+      let years = to.getFullYear() - from.getFullYear();
+      let months = to.getMonth() - from.getMonth();
+      let days = to.getDate() - from.getDate();
+      let hours = to.getHours() - from.getHours();
+      let minutes = to.getMinutes() - from.getMinutes();
+      let seconds = to.getSeconds() - from.getSeconds();
+
+      if (seconds < 0) { seconds += 60; minutes--; }
+      if (minutes < 0) { minutes += 60; hours--; }
+      if (hours < 0) { hours += 24; days--; }
+      if (days < 0) {
+        const prevMonth = new Date(to.getFullYear(), to.getMonth(), 0);
+        days += prevMonth.getDate();
+        months--;
+      }
+      if (months < 0) { months += 12; years--; }
+
+      return { years, months, days, hours, minutes, seconds };
+    }
+
+    const timerIds = ['t-years', 't-months', 't-days', 't-hours', 't-minutes', 't-seconds'];
+    let prevTimerValues = {};
+
+    function pad(n) {
+      return String(n).padStart(2, '0');
+    }
+
+    function updateTimer() {
+      const now = new Date();
+      const parts = getElapsedParts(BIRTH_DATE, now);
+      const values = {
+        't-years': String(parts.years),
+        't-months': pad(parts.months),
+        't-days': pad(parts.days),
+        't-hours': pad(parts.hours),
+        't-minutes': pad(parts.minutes),
+        't-seconds': pad(parts.seconds),
+      };
+
+      timerIds.forEach((id) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const next = values[id];
+        if (prevTimerValues[id] !== next) {
+          el.textContent = next;
+          el.classList.remove('tick');
+          void el.offsetWidth;
+          el.classList.add('tick');
+          prevTimerValues[id] = next;
+        }
+      });
+    }
+
+    updateTimer();
+    setInterval(updateTimer, 1000);
+
+    /* ===================== TIMELINE RENDER ===================== */
+    const timelineEl = document.getElementById('timeline');
+
+    TIMELINE_DATA.forEach((item, index) => {
+      const isEven = index % 2 === 0;
+      const card = document.createElement('article');
+      card.className = 'timeline-card relative';
+      card.setAttribute('tabindex', '0');
+      card.dataset.index = index;
+
+      const rowClass = isEven ? 'sm:flex-row' : 'sm:flex-row-reverse';
+      const spacerClass = isEven ? 'justify-end pr-8' : 'justify-start pl-8';
+      const contentPad = isEven ? 'sm:pr-8 sm:pl-0' : 'sm:pl-8 sm:pr-0';
+
+      card.innerHTML = `
+        <div class="flex flex-col sm:flex-row ${rowClass} items-stretch gap-6 sm:gap-8">
+          <div class="hidden sm:flex w-1/2 ${spacerClass} flex-shrink-0" aria-hidden="true"></div>
+          <div class="absolute left-1/2 -translate-x-1/2 hidden sm:flex z-10 top-8">
+            <div class="timeline-node-dot w-4 h-4 rounded-full bg-gradient-to-br from-rosegold to-rosegoldDark border-2 border-white"></div>
+          </div>
+          <div class="w-full sm:w-1/2 ${contentPad} flex-shrink-0">
+            <div class="glass-strong rounded-2xl p-5 sm:p-6 shadow-rose-glow-sm transition-shadow hover:shadow-rose-glow cursor-pointer group">
+              <time class="text-xs tracking-widest uppercase text-rosegold font-medium">${item.date}</time>
+              <h3 class="font-playfair text-lg sm:text-xl text-stone-800 mt-2 mb-3 font-semibold">${item.title}</h3>
+              <p class="font-montserrat text-sm text-stone-600 font-light leading-relaxed">${item.text}</p>
+              <div class="timeline-photo-wrap mt-5 rounded-xl overflow-hidden shadow-rose-glow-sm aspect-[4/3] max-h-64 sm:max-h-72 bg-white/30" data-photo-url="${item.img.replace(/"/g, '&quot;')}"></div>
+              <p class="mt-3 text-[10px] text-stone-400 opacity-0 group-hover:opacity-100 sm:opacity-60 transition-opacity">
+                Наведи или прокрути — откроется воспоминание
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="sm:hidden flex justify-center -mt-6 mb-2">
+          <div class="timeline-node-dot w-3 h-3 rounded-full bg-rosegold"></div>
+        </div>
+      `;
+
+      timelineEl.appendChild(card);
+      const photoWrap = card.querySelector('.timeline-photo-wrap');
+      if (photoWrap) setupTimelineImage(photoWrap, item.img);
+      const photoImg = photoWrap && photoWrap.querySelector('img');
+      if (photoImg) photoImg.alt = item.title;
+    });
+
+    /* Timeline scroll reveal via Intersection Observer */
+    const timelineCards = document.querySelectorAll('.timeline-card');
+    const revealObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-revealed');
+          }
+        });
+      },
+      { root: null, rootMargin: '0px 0px -10% 0px', threshold: 0.25 }
+    );
+    timelineCards.forEach((card) => revealObserver.observe(card));
+
+    timelineCards.forEach((card) => {
+      card.addEventListener('click', () => card.classList.toggle('is-revealed'));
+    });
+
+    /* ===================== PARTICLE CANVAS (Golden-Rose sparkles) ===================== */
+    const canvas = document.getElementById('particle-canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    let animId = null;
+    let lastTime = 0;
+
+    function resizeCanvas() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+      canvas.style.width = window.innerWidth + 'px';
+      canvas.style.height = window.innerHeight + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function createParticle() {
+      const types = ['spark', 'ember', 'dot'];
+      const type = types[Math.floor(Math.random() * types.length)];
+      return {
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3 - (type === 'ember' ? 0.2 : 0),
+        size: type === 'dot' ? Math.random() * 2 + 0.5 : Math.random() * 3 + 1,
+        life: Math.random(),
+        maxLife: 0.4 + Math.random() * 0.6,
+        type,
+        hue: 15 + Math.random() * 25,
+        alpha: 0.2 + Math.random() * 0.5,
+      };
+    }
+
+    function initParticles(count) {
+      particles = [];
+      const n = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : count;
+      for (let i = 0; i < n; i++) particles.push(createParticle());
+    }
+
+    function drawParticle(p) {
+      const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 4);
+      if (p.type === 'spark') {
+        gradient.addColorStop(0, `hsla(${p.hue}, 60%, 75%, ${p.alpha * p.life})`);
+        gradient.addColorStop(1, 'hsla(25, 50%, 80%, 0)');
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size * 3, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (p.type === 'ember') {
+        ctx.fillStyle = `hsla(${p.hue}, 70%, 65%, ${p.alpha * p.life * 0.8})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        ctx.fillStyle = `hsla(${p.hue}, 40%, 85%, ${p.alpha * p.life * 0.6})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function tickParticles(timestamp) {
+      if (timestamp - lastTime < 32) {
+        animId = requestAnimationFrame(tickParticles);
+        return;
+      }
+      lastTime = timestamp;
+
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+      particles.forEach((p) => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life -= 0.002;
+        if (p.life <= 0 || p.x < -20 || p.x > window.innerWidth + 20 || p.y < -20 || p.y > window.innerHeight + 20) {
+          Object.assign(p, createParticle());
+          p.life = p.maxLife;
+        }
+        drawParticle(p);
+      });
+
+      animId = requestAnimationFrame(tickParticles);
+    }
+
+    resizeCanvas();
+    initParticles(window.innerWidth < 640 ? 35 : 55);
+    animId = requestAnimationFrame(tickParticles);
+
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        resizeCanvas();
+        initParticles(window.innerWidth < 640 ? 35 : 55);
+      }, 150);
+    });
+
+    /* ===================== MUSIC — SETUP: замените music.mp3 или добавьте URL ===================== */
+    const MUSIC_SOURCES = [
+      'music.mp3', // ваш файл в папке с index.html (рекомендуется)
+      // 'https://example.com/your-romantic-song.mp3', // или прямая ссылка на mp3
+    ];
+    const MUSIC_VOLUME = 0.38;
+
+    const audio = document.getElementById('bg-audio');
+    const audioBtn = document.getElementById('audio-btn');
+    const audioIcon = document.getElementById('audio-icon');
+    let audioUnlocked = false;
+    let isPlaying = false;
+    let musicSourceIndex = 0;
+
+    function unlockAudio() {
+      if (audioUnlocked) return;
+      audioUnlocked = true;
+      audio.volume = MUSIC_VOLUME;
+    }
+
+    function setAudioUI(playing) {
+      isPlaying = playing;
+      audioBtn.classList.toggle('is-playing', playing);
+      audioIcon.textContent = playing ? '🎵' : '🔇';
+      audioBtn.title = playing ? 'Выключить музыку' : 'Включить музыку';
+    }
+
+    function loadMusicSource(index) {
+      if (index >= MUSIC_SOURCES.length) return false;
+      musicSourceIndex = index;
+      audio.src = MUSIC_SOURCES[index];
+      audio.load();
+      return true;
+    }
+
+    loadMusicSource(0);
+
+    audio.addEventListener('error', () => {
+      if (loadMusicSource(musicSourceIndex + 1)) {
+        if (isPlaying) audio.play().catch(() => {});
+      }
+    });
+
+    async function startBackgroundMusic() {
+      unlockAudio();
+      if (isPlaying) return;
+      try {
+        await audio.play();
+        setAudioUI(true);
+      } catch (e) {
+        console.warn('Музыка: нажмите 🎵 справа сверху', e);
+      }
+    }
+
+    async function toggleAudio() {
+      unlockAudio();
+      try {
+        if (isPlaying) {
+          audio.pause();
+          setAudioUI(false);
+        } else {
+          if (!audio.src) loadMusicSource(0);
+          await audio.play();
+          setAudioUI(true);
+        }
+      } catch (e) {
+        console.warn('Audio playback blocked:', e);
+      }
+    }
+
+    audioBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleAudio();
+    });
+
+    /* ===================== PETAL SHOWER + COMPLIMENTS ===================== */
+    const complimentBtn = document.getElementById('compliment-btn');
+    const complimentBox = document.getElementById('compliment-box');
+    const complimentText = document.getElementById('compliment-text');
+    let lastComplimentIndex = -1;
+
+    const petalChars = ['🌸', '🌹', '💐', '✨', '🌷', '💖'];
+
+    function spawnPetals(count = 48) {
+      for (let i = 0; i < count; i++) {
+        const el = document.createElement('span');
+        el.className = 'petal';
+        el.textContent = petalChars[Math.floor(Math.random() * petalChars.length)];
+        el.style.left = Math.random() * 100 + 'vw';
+        el.style.setProperty('--drift', (Math.random() - 0.5) * 120 + 'px');
+        el.style.setProperty('--spin', (Math.random() * 720 - 360) + 'deg');
+        el.style.animationDuration = 4 + Math.random() * 4 + 's';
+        el.style.animationDelay = Math.random() * 1.5 + 's';
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 9000);
+      }
+    }
+
+    function randomCompliment() {
+      let idx;
+      do {
+        idx = Math.floor(Math.random() * COMPLIMENTS.length);
+      } while (idx === lastComplimentIndex && COMPLIMENTS.length > 1);
+      lastComplimentIndex = idx;
+      return COMPLIMENTS[idx];
+    }
+
+    complimentBtn.addEventListener('click', () => {
+      spawnPetals();
+      complimentText.textContent = randomCompliment();
+      complimentBox.classList.remove('is-visible');
+      void complimentBox.offsetWidth;
+      complimentBox.classList.add('is-visible');
+    });
+
+    /* Safe area for notched phones */
+    const style = document.createElement('style');
+    style.textContent = `    .safe-top { top: max(1rem, env(safe-area-inset-top)); }
+    .ui-hidden-until-open { opacity: 0; pointer-events: none; }`;
+    document.head.appendChild(style);
+  </script>
+</body>
+</html>
