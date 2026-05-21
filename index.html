@@ -380,7 +380,7 @@
     .timeline-photo-wrap.has-error img { display: none; }
     .timeline-photo-wrap.has-error .timeline-photo-error { display: block; }
 
-    /* Premium video — портрет video.MOV: 1072×1904 (9:16) */
+    /* Premium video — портрет video.mp4: 1072×1904 (9:16) */
     .video-premium-wrap {
       position: relative;
       border-radius: 1.5rem;
@@ -599,7 +599,7 @@
       </p>
     </header>
 
-    <!-- ========== VIDEO — EDIT: замените video.MOV на свой файл ========== -->
+    <!-- ========== VIDEO — файл video.mp4 в папке с index.html ========== -->
     <section
       id="video-section"
       class="px-4 py-12 sm:px-6 sm:py-16 max-w-3xl mx-auto video-reveal opacity-0"
@@ -614,7 +614,7 @@
       </p>
 
       <div id="video-wrap" class="video-premium-wrap glass-strong shadow-rose-glow">
-        <!-- EDIT VIDEO: положите video.mp4 (быстрее) или video.MOV | кадр 1072×1904 -->
+        <!-- EDIT VIDEO: video.mp4 | кадр 1072×1904 -->
         <video
           id="birthday-video"
           width="1072"
@@ -623,6 +623,7 @@
           preload="none"
           controls
           controlsList="nodownload"
+          data-src="video.mp4"
         ></video>
         <div class="video-loading" id="video-loading" aria-live="polite">
           <div class="video-loading-spinner" aria-hidden="true"></div>
@@ -1184,23 +1185,18 @@
       toggleAudio();
     });
 
-    /* ===================== VIDEO — ленивая загрузка (не тянет 17 МБ при открытии сайта) ===================== */
-    const VIDEO_SOURCES = [
-      { src: 'video.mp4', type: 'video/mp4' },
-      { src: 'video.MOV', type: 'video/quicktime' },
-    ];
+    /* ===================== VIDEO — video.mp4, ленивая загрузка (~6 МБ) ===================== */
+    const VIDEO_FILE = 'video.mp4'; // EDIT VIDEO PATH HERE
 
     const videoSection = document.getElementById('video-section');
     const videoWrap = document.getElementById('video-wrap');
     const birthdayVideo = document.getElementById('birthday-video');
     const videoPlayBtn = document.getElementById('video-play-btn');
-    const videoLoadingEl = document.getElementById('video-loading');
 
     let videoSourceAttached = false;
     let videoSourceAttachPromise = null;
     let musicWasPlayingBeforeVideo = false;
     let musicPausedForVideoSession = false;
-
     function setVideoLoading(loading) {
       videoWrap.classList.toggle('is-loading', loading);
     }
@@ -1228,45 +1224,42 @@
       if (videoSourceAttached) return Promise.resolve(true);
       if (videoSourceAttachPromise) return videoSourceAttachPromise;
 
+      const src = birthdayVideo.dataset.src || VIDEO_FILE;
+
       videoSourceAttachPromise = new Promise((resolve) => {
-        let index = 0;
+        const timeout = setTimeout(() => {
+          cleanup();
+          videoSourceAttached = true;
+          videoSourceAttachPromise = null;
+          resolve(true);
+        }, 12000);
 
-        const trySource = () => {
-          if (index >= VIDEO_SOURCES.length) {
-            videoSourceAttachPromise = null;
-            resolve(false);
-            return;
-          }
-
-          const { src, type } = VIDEO_SOURCES[index];
-          birthdayVideo.innerHTML = '';
-          const source = document.createElement('source');
-          source.src = src;
-          source.type = type;
-          birthdayVideo.appendChild(source);
-          birthdayVideo.load();
-
-          const onReady = () => {
-            cleanup();
-            videoSourceAttached = true;
-            videoSourceAttachPromise = null;
-            resolve(true);
-          };
-          const onError = () => {
-            cleanup();
-            index += 1;
-            trySource();
-          };
-          const cleanup = () => {
-            birthdayVideo.removeEventListener('loadedmetadata', onReady);
-            birthdayVideo.removeEventListener('error', onError);
-          };
-
-          birthdayVideo.addEventListener('loadedmetadata', onReady, { once: true });
-          birthdayVideo.addEventListener('error', onError, { once: true });
+        const onReady = () => {
+          clearTimeout(timeout);
+          cleanup();
+          videoSourceAttached = true;
+          videoSourceAttachPromise = null;
+          resolve(true);
         };
 
-        trySource();
+        const onError = () => {
+          clearTimeout(timeout);
+          cleanup();
+          videoSourceAttachPromise = null;
+          resolve(false);
+        };
+
+        const cleanup = () => {
+          birthdayVideo.removeEventListener('loadeddata', onReady);
+          birthdayVideo.removeEventListener('canplay', onReady);
+          birthdayVideo.removeEventListener('error', onError);
+        };
+
+        birthdayVideo.src = src;
+        birthdayVideo.load();
+        birthdayVideo.addEventListener('loadeddata', onReady, { once: true });
+        birthdayVideo.addEventListener('canplay', onReady, { once: true });
+        birthdayVideo.addEventListener('error', onError, { once: true });
       });
 
       return videoSourceAttachPromise;
@@ -1286,7 +1279,7 @@
       if (!ok) {
         setVideoLoading(false);
         resumeMusicAfterVideo();
-        console.warn('Видео не найдено: положите video.mp4 или video.MOV в папку');
+        console.warn('Видео не найдено: положите video.mp4 в папку с index.html');
         return;
       }
 
@@ -1296,14 +1289,14 @@
       } catch (e) {
         console.warn('Видео: дождитесь загрузки или нажмите play в плеере', e);
         setVideoPlayingState(false);
+        videoWrap.classList.remove('is-loading');
         resumeMusicAfterVideo();
-      } finally {
-        setVideoLoading(false);
       }
     }
 
     function onVideoPausedOrEnded() {
       setVideoPlayingState(false);
+      videoWrap.classList.remove('is-loading');
       resumeMusicAfterVideo();
     }
 
@@ -1318,12 +1311,22 @@
       birthdayVideo.addEventListener('play', () => {
         pauseMusicForVideo();
         setVideoPlayingState(true);
-        setVideoLoading(false);
+        videoWrap.classList.remove('is-loading');
+      });
+      birthdayVideo.addEventListener('playing', () => {
+        videoWrap.classList.remove('is-loading');
+      });
+      birthdayVideo.addEventListener('canplay', () => {
+        if (videoWrap.classList.contains('is-loading')) {
+          videoWrap.classList.remove('is-loading');
+        }
       });
       birthdayVideo.addEventListener('pause', onVideoPausedOrEnded);
       birthdayVideo.addEventListener('ended', onVideoPausedOrEnded);
-      birthdayVideo.addEventListener('waiting', () => setVideoLoading(true));
-      birthdayVideo.addEventListener('playing', () => setVideoLoading(false));
+      birthdayVideo.addEventListener('error', () => {
+        videoWrap.classList.remove('is-loading');
+        resumeMusicAfterVideo();
+      });
     }
 
     if (videoSection) {
