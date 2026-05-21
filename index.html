@@ -380,6 +380,71 @@
     .timeline-photo-wrap.has-error img { display: none; }
     .timeline-photo-wrap.has-error .timeline-photo-error { display: block; }
 
+    /* Premium video — портрет video.MOV: 1072×1904 (9:16) */
+    .video-premium-wrap {
+      position: relative;
+      border-radius: 1.5rem;
+      overflow: hidden;
+      aspect-ratio: 1072 / 1904;
+      width: min(88vw, 380px);
+      max-height: min(75dvh, 674px);
+      margin-left: auto;
+      margin-right: auto;
+      background: linear-gradient(145deg, #f6e6dd, #fff6f6);
+    }
+    @media (min-width: 640px) {
+      .video-premium-wrap {
+        width: min(420px, 40vw);
+        max-height: min(80dvh, 746px);
+      }
+    }
+    .video-premium-wrap video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      background: #1a1a1a;
+    }
+    .video-play-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      background: rgba(255, 246, 246, 0.35);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+      cursor: pointer;
+      border: none;
+      width: 100%;
+    }
+    .video-premium-wrap.is-playing .video-play-overlay {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .video-play-ring {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 40px rgba(201, 160, 135, 0.45);
+      transition: transform 0.3s ease;
+    }
+    .video-play-overlay:hover .video-play-ring {
+      transform: scale(1.06);
+    }
+    #video-section.is-visible .video-reveal {
+      animation: fadeUp 0.8s ease-out forwards;
+    }
+
     @media (prefers-reduced-motion: reduce) {
       .timeline-photo-wrap,
       .petal,
@@ -503,6 +568,41 @@
         <span class="text-rosegold">♊</span> 21 мая 2001 · Gemini
       </p>
     </header>
+
+    <!-- ========== VIDEO — EDIT: замените video.MOV на свой файл ========== -->
+    <section
+      id="video-section"
+      class="px-4 py-12 sm:px-6 sm:py-16 max-w-3xl mx-auto video-reveal opacity-0"
+      aria-labelledby="video-heading"
+    >
+      <p class="text-center text-[10px] uppercase tracking-[0.25em] text-rosegold mb-3">Exclusive</p>
+      <h2 id="video-heading" class="font-playfair text-2xl sm:text-3xl text-center text-stone-800 mb-3 font-semibold">
+        Видео-послание 🎬
+      </h2>
+      <p class="font-montserrat text-sm text-stone-500 text-center mb-8 font-light max-w-md mx-auto">
+        Особенный кадр — только для тебя
+      </p>
+
+      <div id="video-wrap" class="video-premium-wrap glass-strong shadow-rose-glow">
+        <!-- EDIT VIDEO PATH HERE | размер кадра: 1072×1904 -->
+        <video
+          id="birthday-video"
+          width="1072"
+          height="1904"
+          playsinline
+          preload="metadata"
+          controls
+          controlsList="nodownload"
+        >
+          <source src="video.MOV" type="video/quicktime" />
+          <source src="video.MOV" type="video/mp4" />
+        </video>
+        <button type="button" class="video-play-overlay" id="video-play-btn" aria-label="Воспроизвести видео">
+          <span class="video-play-ring text-2xl text-rosegoldDark" aria-hidden="true">▶</span>
+          <span class="font-montserrat text-xs uppercase tracking-widest text-stone-600">Смотреть</span>
+        </button>
+      </div>
+    </section>
 
     <!-- ========== TIMELINE SECTION ========== -->
     <section class="relative px-4 py-16 sm:px-6 sm:py-24 max-w-3xl mx-auto" aria-labelledby="timeline-heading">
@@ -1052,6 +1152,87 @@
       e.stopPropagation();
       toggleAudio();
     });
+
+    /* ===================== VIDEO (video.MOV) ===================== */
+    const VIDEO_SRC = 'video.MOV'; // EDIT VIDEO PATH HERE
+    const videoSection = document.getElementById('video-section');
+    const videoWrap = document.getElementById('video-wrap');
+    const birthdayVideo = document.getElementById('birthday-video');
+    const videoPlayBtn = document.getElementById('video-play-btn');
+    let musicVolumeBeforeVideo = MUSIC_VOLUME;
+
+    if (birthdayVideo) {
+      birthdayVideo.querySelectorAll('source').forEach((s) => {
+        s.src = VIDEO_SRC;
+      });
+      birthdayVideo.load();
+    }
+
+    function duckMusicForVideo(duck) {
+      if (!audio) return;
+      if (duck) {
+        musicVolumeBeforeVideo = audio.volume;
+        audio.volume = Math.min(0.12, musicVolumeBeforeVideo * 0.3);
+      } else {
+        audio.volume = musicVolumeBeforeVideo;
+      }
+    }
+
+    function setVideoPlayingState(playing) {
+      videoWrap.classList.toggle('is-playing', playing);
+    }
+
+    async function playBirthdayVideo() {
+      if (!birthdayVideo) return;
+      duckMusicForVideo(true);
+      try {
+        await birthdayVideo.play();
+        setVideoPlayingState(true);
+      } catch (e) {
+        console.warn('Видео: используйте кнопки плеера', e);
+        setVideoPlayingState(false);
+        duckMusicForVideo(false);
+      }
+    }
+
+    if (videoPlayBtn) {
+      videoPlayBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        playBirthdayVideo();
+      });
+    }
+
+    if (birthdayVideo) {
+      birthdayVideo.addEventListener('play', () => {
+        setVideoPlayingState(true);
+        duckMusicForVideo(true);
+      });
+      birthdayVideo.addEventListener('pause', () => {
+        setVideoPlayingState(false);
+        duckMusicForVideo(false);
+      });
+      birthdayVideo.addEventListener('ended', () => {
+        setVideoPlayingState(false);
+        duckMusicForVideo(false);
+      });
+    }
+
+    if (videoSection) {
+      const videoRevealObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-visible');
+              entry.target.classList.remove('opacity-0');
+            } else if (birthdayVideo && !birthdayVideo.paused) {
+              birthdayVideo.pause();
+            }
+          });
+        },
+        { threshold: 0.2 }
+      );
+      videoRevealObserver.observe(videoSection);
+    }
 
     /* ===================== PETAL SHOWER + COMPLIMENTS ===================== */
     const complimentBtn = document.getElementById('compliment-btn');
